@@ -32,14 +32,14 @@ def to_device(data, device):
             durations,
         ) = data
 
-        speakers = torch.from_numpy(speakers).long().to(device)
-        texts = torch.from_numpy(texts).long().to(device)
-        src_lens = torch.from_numpy(src_lens).to(device)
-        mels = torch.from_numpy(mels).float().to(device)
-        mel_lens = torch.from_numpy(mel_lens).to(device)
-        pitches = torch.from_numpy(pitches).float().to(device)
-        energies = torch.from_numpy(energies).to(device)
-        durations = torch.from_numpy(durations).long().to(device)
+        speakers = torch.from_numpy(speakers).long().nan_to_num().to(device)
+        texts = torch.from_numpy(texts).long().nan_to_num().to(device)
+        src_lens = torch.from_numpy(src_lens).nan_to_num().to(device)
+        mels = torch.from_numpy(mels).float().nan_to_num().to(device)
+        mel_lens = torch.from_numpy(mel_lens).nan_to_num().to(device)
+        pitches = torch.from_numpy(pitches).nan_to_num().float().to(device)
+        energies = torch.from_numpy(energies).nan_to_num().to(device)
+        durations = torch.from_numpy(durations).long().nan_to_num().to(device)
 
         return (
             ids,

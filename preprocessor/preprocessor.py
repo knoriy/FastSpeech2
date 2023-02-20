@@ -179,13 +179,16 @@ class Preprocessor:
             raw_text = f.readline().strip("\n")
 
         # Compute fundamental frequency
-        pitch, t = pw.dio(
-            wav.astype(np.float64),
-            self.sampling_rate,
-            frame_period=self.hop_length / self.sampling_rate * 1000,
-        )
-        pitch = pw.stonemask(wav.astype(np.float64), pitch, t, self.sampling_rate)
-
+        try:
+            pitch, t = pw.dio(
+                wav.astype(np.float64),
+                self.sampling_rate,
+                frame_period=self.hop_length / self.sampling_rate * 1000,
+            )
+            pitch = pw.stonemask(wav.astype(np.float64), pitch, t, self.sampling_rate)
+        except:
+            print(basename)
+            return None
         pitch = pitch[: sum(duration)]
         if np.sum(pitch != 0) <= 1:
             return None

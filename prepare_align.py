@@ -12,7 +12,7 @@ def main(config):
         aishell3.prepare_align(config)
     if "LibriTTS" in config["dataset"]:
         libritts.prepare_align(config)
-    if "emns" in config["dataset"]:
+    if "EMNS" in config["dataset"]:
         emns.prepare_align(config)
 
 

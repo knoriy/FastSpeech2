@@ -82,7 +82,7 @@ We take LJSpeech as an example hereafter.
  
 First, run 
 ```
-python3 prepare_align.py config/LJSpeech/preprocess.yaml
+python3 prepare_align.py config/EMNS/preprocess.yaml
 ```
 for some preparations.
 
@@ -92,7 +92,12 @@ You have to unzip the files in ``preprocessed_data/LJSpeech/TextGrid/``.
 
 After that, run the preprocessing script by
 ```
-python3 preprocess.py config/LJSpeech/preprocess.yaml
+python3 preprocess.py config/EMNS/preprocess.yaml
+```
+
+Get emotion labels by
+```
+python3 get_emotion.py config/EMNS/preprocess.yaml
 ```
 
 Alternately, you can align the corpus by yourself. 
@@ -114,7 +119,7 @@ python3 preprocess.py config/LJSpeech/preprocess.yaml
 
 Train your model with
 ```
-python3 train.py -p config/LJSpeech/preprocess.yaml -m config/LJSpeech/model.yaml -t config/LJSpeech/train.yaml
+python3 train.py -p config/EMNS/preprocess.yaml -m config/EMNS/model.yaml -t config/EMNS/train.yaml
 ```
 
 The model takes less than 10k steps (less than 1 hour on my GTX1080Ti GPU) of training to generate audio samples with acceptable quality, which is much more efficient than the autoregressive models such as Tacotron2.

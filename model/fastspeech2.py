@@ -52,9 +52,11 @@ class FastSpeech2(nn.Module):
         p_targets=None,
         e_targets=None,
         d_targets=None,
+        emo_targets=None,
         p_control=1.0,
         e_control=1.0,
         d_control=1.0,
+        emo_control=1.0,
     ):
         src_masks = get_mask_from_lengths(src_lens, max_src_len)
         mel_masks = (
@@ -69,11 +71,11 @@ class FastSpeech2(nn.Module):
             output = output + self.speaker_emb(speakers).unsqueeze(1).expand(
                 -1, max_src_len, -1
             )
-
         (
             output,
             p_predictions,
             e_predictions,
+            emo_predictions,
             log_d_predictions,
             d_rounded,
             mel_lens,
@@ -86,9 +88,11 @@ class FastSpeech2(nn.Module):
             p_targets,
             e_targets,
             d_targets,
+            emo_targets,
             p_control,
             e_control,
             d_control,
+            emo_control,
         )
 
         output, mel_masks = self.decoder(output, mel_masks)
@@ -101,6 +105,7 @@ class FastSpeech2(nn.Module):
             postnet_output,
             p_predictions,
             e_predictions,
+            emo_predictions,
             log_d_predictions,
             d_rounded,
             src_masks,

@@ -28,5 +28,5 @@ preprocessing:
   energy:
     feature: "phoneme_level" # support 'phoneme_level' or 'frame_level'
     normalization: True
-  emoton:
+  emotion:
     feature: "frame_level" # support 'phoneme_level' or 'frame_level'

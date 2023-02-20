@@ -23,11 +23,15 @@ class VarianceAdaptor(nn.Module):
         self.length_regulator = LengthRegulator()
         self.pitch_predictor = VariancePredictor(model_config)
         self.energy_predictor = VariancePredictor(model_config)
+        self.emotion_predictor = VariancePredictor(model_config)
 
         self.pitch_feature_level = preprocess_config["preprocessing"]["pitch"][
             "feature"
         ]
         self.energy_feature_level = preprocess_config["preprocessing"]["energy"][
+            "feature"
+        ]
+        self.emotion_feature_level = preprocess_config["preprocessing"]["emotion"][
             "feature"
         ]
         assert self.pitch_feature_level in ["phoneme_level", "frame_level"]
@@ -76,6 +80,9 @@ class VarianceAdaptor(nn.Module):
         self.energy_embedding = nn.Embedding(
             n_bins, model_config["transformer"]["encoder_hidden"]
         )
+        self.emotion_embedding = nn.Embedding(
+            n_bins, model_config["transformer"]["encoder_hidden"]
+        )
 
     def get_pitch_embedding(self, x, target, mask, control):
         prediction = self.pitch_predictor(x, mask)
@@ -98,7 +105,16 @@ class VarianceAdaptor(nn.Module):
                 torch.bucketize(prediction, self.energy_bins)
             )
         return prediction, embedding
-
+    
+    def get_emotion_embedding(self, x, target, mask, control):
+        prediction = self.emotion_predictor(x, mask)
+        if target is not None:
+            embedding = self.emotion_embedding(target)
+        else:
+            prediction = prediction * control
+            embedding = self.emotion_embedding(prediction)
+        return prediction, embedding
+    
     def forward(
         self,
         x,
@@ -108,9 +124,11 @@ class VarianceAdaptor(nn.Module):
         pitch_target=None,
         energy_target=None,
         duration_target=None,
+        emotion_target=None,
         p_control=1.0,
         e_control=1.0,
         d_control=1.0,
+        emo_control=1.0,
     ):
 
         log_duration_prediction = self.duration_predictor(x, src_mask)
@@ -121,9 +139,14 @@ class VarianceAdaptor(nn.Module):
             x = x + pitch_embedding
         if self.energy_feature_level == "phoneme_level":
             energy_prediction, energy_embedding = self.get_energy_embedding(
-                x, energy_target, src_mask, p_control
+                x, energy_target, src_mask, e_control
             )
             x = x + energy_embedding
+        if self.emotion_feature_level == "phoneme_level":
+            emotion_prediction, emotion_embedding = self.get_emotion_embedding(
+                x, emotion_target, src_mask, e_control
+            )
+            x = x + emotion_embedding.unsqueeze(1)
 
         if duration_target is not None:
             x, mel_len = self.length_regulator(x, duration_target, max_len)
@@ -143,14 +166,21 @@ class VarianceAdaptor(nn.Module):
             x = x + pitch_embedding
         if self.energy_feature_level == "frame_level":
             energy_prediction, energy_embedding = self.get_energy_embedding(
-                x, energy_target, mel_mask, p_control
+                x, energy_target, mel_mask, e_control
             )
             x = x + energy_embedding
+
+        if self.emotion_feature_level == "frame_level":
+            emotion_prediction, emotion_embedding = self.get_emotion_embedding(
+                x, emotion_target, mel_mask, e_control
+            )
+            x = x + emotion_embedding.unsqueeze(1)
 
         return (
             x,
             pitch_prediction,
             energy_prediction,
+            emotion_prediction,
             log_duration_prediction,
             duration_rounded,
             mel_len,

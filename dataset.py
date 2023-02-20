@@ -106,7 +106,7 @@ class Dataset(Dataset):
         pitches = [data[idx]["pitch"] for idx in idxs]
         energies = [data[idx]["energy"] for idx in idxs]
         durations = [data[idx]["duration"] for idx in idxs]
-        emotions = [[data[idx]["emotion"]] for idx in idxs]
+        emotions = [data[idx]["emotion"] for idx in idxs]
 
         text_lens = np.array([text.shape[0] for text in texts])
         mel_lens = np.array([mel.shape[0] for mel in mels])

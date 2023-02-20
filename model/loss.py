@@ -15,6 +15,7 @@ class FastSpeech2Loss(nn.Module):
         ]
         self.mse_loss = nn.MSELoss()
         self.mae_loss = nn.L1Loss()
+        self.cross_loss = nn.CrossEntropyLoss()
 
     def forward(self, inputs, predictions):
         (
@@ -24,12 +25,14 @@ class FastSpeech2Loss(nn.Module):
             pitch_targets,
             energy_targets,
             duration_targets,
+            emotion_targets,
         ) = inputs[6:]
         (
             mel_predictions,
             postnet_mel_predictions,
             pitch_predictions,
             energy_predictions,
+            emotion_predictions,
             log_duration_predictions,
             _,
             src_masks,
@@ -47,6 +50,8 @@ class FastSpeech2Loss(nn.Module):
         pitch_targets.requires_grad = False
         energy_targets.requires_grad = False
         mel_targets.requires_grad = False
+        emotion_targets.requires_grad = False
+
 
         if self.pitch_feature_level == "phoneme_level":
             pitch_predictions = pitch_predictions.masked_select(src_masks)
@@ -77,9 +82,10 @@ class FastSpeech2Loss(nn.Module):
         pitch_loss = self.mse_loss(pitch_predictions, pitch_targets)
         energy_loss = self.mse_loss(energy_predictions, energy_targets)
         duration_loss = self.mse_loss(log_duration_predictions, log_duration_targets)
+        emotion_loss = self.cross_loss(emotion_predictions, emotion_targets)
 
         total_loss = (
-            mel_loss + postnet_mel_loss + duration_loss + pitch_loss + energy_loss
+            mel_loss + postnet_mel_loss + duration_loss + pitch_loss + energy_loss + emotion_loss
         )
 
         return (
@@ -89,4 +95,5 @@ class FastSpeech2Loss(nn.Module):
             pitch_loss,
             energy_loss,
             duration_loss,
+            emotion_loss,
         )

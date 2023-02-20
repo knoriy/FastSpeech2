@@ -16,7 +16,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def to_device(data, device):
-    if len(data) == 12:
+    if len(data) == 13:
         (
             ids,
             raw_texts,
@@ -30,6 +30,7 @@ def to_device(data, device):
             pitches,
             energies,
             durations,
+            emotions,
         ) = data
 
         speakers = torch.from_numpy(speakers).long().nan_to_num().to(device)
@@ -40,6 +41,7 @@ def to_device(data, device):
         pitches = torch.from_numpy(pitches).nan_to_num().float().to(device)
         energies = torch.from_numpy(energies).nan_to_num().to(device)
         durations = torch.from_numpy(durations).long().nan_to_num().to(device)
+        emotions = torch.from_numpy(emotions).long().nan_to_num().to(device)
 
         return (
             ids,
@@ -54,6 +56,7 @@ def to_device(data, device):
             pitches,
             energies,
             durations,
+            emotions,
         )
 
     if len(data) == 6:
@@ -89,6 +92,7 @@ def log(
 
 
 def get_mask_from_lengths(lengths, max_len=None):
+    device = lengths.device
     batch_size = lengths.shape[0]
     if max_len is None:
         max_len = torch.max(lengths).item()
